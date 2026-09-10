@@ -58,6 +58,15 @@
         <option value="auto">Auto-detect topic</option>
         <option>Computation</option><option>Number Theory</option><option>Consumer Arithmetic</option><option>Sets</option><option>Measurement</option><option>Statistics</option><option>Algebra</option><option>Relations, Functions and Graphs</option><option>Geometry and Trigonometry</option><option>Vectors and Matrices</option>
       </select>
+      <div class="tutor-upload" id="tutorUpload" hidden>
+        <input type="file" id="tutorImage" accept="image/*" capture="environment" hidden>
+        <button type="button" class="tutor-photo-btn" id="tutorPhotoBtn">📷 Upload a photo of your work</button>
+        <div class="tutor-preview-wrap" id="tutorPreviewWrap" hidden>
+          <img id="tutorPreview" alt="Selected maths work">
+          <div class="tutor-preview-info"><span id="tutorImageName">Photo selected</span><button type="button" id="tutorRemoveImage">Remove</button></div>
+        </div>
+        <div class="tutor-photo-help">Choose a clear photo showing the question and your working. The tutor can read the image and check your steps.</div>
+      </div>
       <div class="tutor-chat" id="tutorChat">
         <div class="tutor-msg ai"><div class="tutor-bubble"><b>Hi! I’m your CSEC Maths tutor.</b><br>Send me a question, tell me what topic is confusing you, or ask me to give you practice. I’ll explain it in CSEC style and show the working step by step.</div></div>
       </div>
