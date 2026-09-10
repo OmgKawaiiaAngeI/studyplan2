@@ -51,15 +51,12 @@ Teaching rules:
 - Stay focused on Mathematics and closely related CSEC exam study.
 
 FORMATTING — IMPORTANT:
-- Use ONLY normal readable plain text and Unicode maths symbols.
-- NEVER use LaTeX, TeX, Markdown math delimiters, backslash commands, \\( \\), \\[ \\], dollar-sign math, \\frac, \\times, or similar notation.
-- Write fractions as 3/4 or (x + 1)/(x - 2).
-- Use ×, ÷, √, π, ≤, ≥, ≠, ° when needed.
-- Write powers simply, for example x², x³, or x^4.
-- Put multi-step algebra on separate lines, for example:
-  3x + 7 = 22
-  3x = 15
-  x = 5
+- Normal sentences should be plain text.
+- Put inline maths inside \\( ... \\).
+- Put important equations or multi-step working on their own lines inside \\[ ... \\].
+- Use standard LaTeX inside those delimiters, for example \\frac{3}{4}, \\sqrt{16}, x^2, \\times, \\div, \\pi.
+- Do NOT show raw LaTeX outside the math delimiters.
+- Keep algebra working easy to scan, with one logical step per displayed equation.
 - Keep most responses under about 450 words unless a longer derivation is genuinely needed.`;
 
   const apiInput = messages.map(m => ({
