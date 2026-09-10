@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tutor.css">
 </head>
 <body>
 <div class="wrap">
@@ -21,6 +22,7 @@
     <div class="tab" data-view="checkins">Check-ins</div>
     <div class="tab" data-view="mynotes">Notes</div>
     <div class="tab" data-view="questions">Questions</div>
+    <div class="tab" data-view="tutor">AI Tutor</div>
     <div class="tab" data-view="progress">Progress</div>
   </div>
 
@@ -40,6 +42,34 @@
 
   <div class="view" id="view-questions"><div class="panel"><h2>Pick a subject</h2><button class="quick-review-btn" id="qQuickReview">&#9889; Quick review (5 mixed questions)</button><select id="qSubject"></select><div class="q-progress" id="qProgress"></div><div class="q-card" id="qCard"></div><div class="q-answer" id="qAnswer" style="display:none;"></div><div class="fc-controls" style="margin-bottom:10px;"><button class="fc-btn" id="qShowAnswer">Show answer</button></div><div class="q-grade-row" id="qGradeRow" style="display:none;"><button class="q-grade-btn q-grade-wrong" id="qWrong">Got it wrong</button><button class="q-grade-btn q-grade-right" id="qRight">Got it right (+2)</button></div></div></div>
 
+  <div class="view" id="view-tutor">
+    <div class="panel tutor-panel">
+      <div class="tutor-title-row">
+        <div class="tutor-avatar">🧠</div>
+        <div><h2 style="margin-bottom:2px;">CSEC Maths AI Tutor</h2><div class="tutor-sub">Built for CSEC General Proficiency Mathematics</div></div>
+      </div>
+      <div class="tutor-modes" id="tutorModes">
+        <button class="tutor-mode active" data-mode="teach">Teach me</button>
+        <button class="tutor-mode" data-mode="hint">Hint only</button>
+        <button class="tutor-mode" data-mode="check">Check my work</button>
+        <button class="tutor-mode" data-mode="practice">Practice me</button>
+      </div>
+      <select id="tutorTopic" class="tutor-topic">
+        <option value="auto">Auto-detect topic</option>
+        <option>Computation</option><option>Number Theory</option><option>Consumer Arithmetic</option><option>Sets</option><option>Measurement</option><option>Statistics</option><option>Algebra</option><option>Relations, Functions and Graphs</option><option>Geometry and Trigonometry</option><option>Vectors and Matrices</option>
+      </select>
+      <div class="tutor-chat" id="tutorChat">
+        <div class="tutor-msg ai"><div class="tutor-bubble"><b>Hi! I’m your CSEC Maths tutor.</b><br>Send me a question, tell me what topic is confusing you, or ask me to give you practice. I’ll explain it in CSEC style and show the working step by step.</div></div>
+      </div>
+      <div class="tutor-status" id="tutorStatus"></div>
+      <div class="tutor-input-row">
+        <textarea id="tutorInput" rows="2" maxlength="3000" placeholder="Ask a CSEC maths question..."></textarea>
+        <button id="tutorSend" class="tutor-send">Send</button>
+      </div>
+      <div class="tutor-actions"><button id="tutorClear" class="tutor-clear">Clear chat</button><span>AI can make mistakes — check important answers.</span></div>
+    </div>
+  </div>
+
   <div class="view" id="view-progress"><div class="panel"><div class="mascot-row"><div class="mascot-face" id="mascotFace">&#127775;</div><div class="mascot-bubble" id="mascotBubble">Let's study today!</div></div><div class="streak-row"><div class="streak-box"><div class="streak-num" id="streakNum">0</div><div class="streak-label">&#128293; day streak</div></div><div class="streak-box"><div class="streak-num" id="levelNum">1</div><div class="streak-label">level</div></div></div><div class="xp-level" id="xpLabel">0 XP</div><div class="xp-bar-shell"><div class="xp-bar-fill" id="xpBarFill" style="width:0%;"></div></div><div class="xp-sub" id="xpSub">0 / 50 to next level</div></div><div class="panel"><h2>Points this week</h2><div class="q-chart" id="qChart"></div></div><div class="panel" id="weakSpotPanel" style="display:none;"><h2>Worth reviewing</h2><div class="weak-callout" id="weakSpotText"></div></div><div class="panel"><h2>Badges</h2><div class="badge-grid" id="badgeGrid"></div></div></div>
 </div>
 <div class="tip-overlay" id="tipOverlay"><div class="tip-card"><div class="tip-emoji" id="tipEmoji">&#127793;</div><div class="tip-heading" id="tipHeading">Quick tip</div><div class="tip-text" id="tipText"></div><button class="fc-btn" id="tipContinue">Continue</button></div></div>
@@ -48,5 +78,6 @@
 <script src="script2.js"></script>
 <script src="script3.js"></script>
 <script src="script4.js"></script>
+<script src="tutor.js"></script>
 </body>
 </html>
