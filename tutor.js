@@ -20,32 +20,10 @@
   let messages = [];
   let imageData = null;
 
-  function cleanMathText(text){
-    if(typeof text !== 'string') return '';
-    return text
-      .replace(/\\\[/g, '')
-      .replace(/\\\]/g, '')
-      .replace(/\\\(/g, '')
-      .replace(/\\\)/g, '')
-      .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)')
-      .replace(/\\sqrt\{([^{}]+)\}/g, '√($1)')
-      .replace(/\\times/g, '×')
-      .replace(/\\div/g, '÷')
-      .replace(/\\cdot/g, '·')
-      .replace(/\\leq/g, '≤')
-      .replace(/\\geq/g, '≥')
-      .replace(/\\neq/g, '≠')
-      .replace(/\\pm/g, '±')
-      .replace(/\\pi/g, 'π')
-      .replace(/\\theta/g, 'θ')
-      .replace(/\\degree/g, '°')
-      .replace(/\^\{2\}/g, '²')
-      .replace(/\^\{3\}/g, '³')
-      .replace(/\\text\{([^{}]+)\}/g, '$1')
-      .replace(/\\,/g, ' ')
-      .replace(/\\;/g, ' ')
-      .replace(/\\!/g, '')
-      .replace(/\\([A-Za-z]+)/g, '$1');
+  function typesetMath(el){
+    if(window.MathJax && typeof window.MathJax.typesetPromise === 'function'){
+      window.MathJax.typesetPromise([el]).catch(() => {});
+    }
   }
 
   function addBubble(role, text, imageUrl){
@@ -53,6 +31,7 @@
     row.className = 'tutor-msg ' + role;
     const bubble = document.createElement('div');
     bubble.className = 'tutor-bubble';
+
     if(imageUrl){
       const img = document.createElement('img');
       img.className = 'tutor-chat-image';
@@ -60,11 +39,14 @@
       img.alt = 'Uploaded maths work';
       bubble.appendChild(img);
     }
+
     const textEl = document.createElement('div');
-    textEl.textContent = cleanMathText(text);
+    textEl.className = 'tutor-text';
+    textEl.textContent = typeof text === 'string' ? text : '';
     bubble.appendChild(textEl);
     row.appendChild(bubble);
     chat.appendChild(row);
+    typesetMath(textEl);
     chat.scrollTop = chat.scrollHeight;
     return row;
   }
@@ -75,6 +57,14 @@
     topic.disabled = busy;
     if(photoBtn) photoBtn.disabled = busy;
     status.textContent = busy ? (imageData ? 'Tutor is reading your photo…' : 'Tutor is working it out…') : '';
+  }
+
+  function clearSelectedImage(){
+    imageData = null;
+    if(imageInput) imageInput.value = '';
+    if(previewWrap) previewWrap.hidden = true;
+    if(preview) preview.removeAttribute('src');
+    if(imageName) imageName.textContent = 'Photo selected';
   }
 
   function updateModeUI(){
@@ -91,14 +81,6 @@
     mode = btn.dataset.mode;
     updateModeUI();
   }));
-
-  function clearSelectedImage(){
-    imageData = null;
-    if(imageInput) imageInput.value = '';
-    if(previewWrap) previewWrap.hidden = true;
-    if(preview) preview.removeAttribute('src');
-    if(imageName) imageName.textContent = 'Photo selected';
-  }
 
   async function compressImage(file){
     return new Promise((resolve, reject) => {
@@ -163,7 +145,9 @@
     if(!text && !imageData) return;
     if(send.disabled) return;
 
-    if(!text && imageData) text = 'Please check my maths work in this photo. Tell me what I did right, identify the first mistake if there is one, and show me how to fix it.';
+    if(!text && imageData){
+      text = 'Please check my maths work in this photo. Tell me what I did right, identify the first mistake if there is one, and show me how to fix it.';
+    }
 
     const sentImage = imageData;
     addBubble('user', text, sentImage);
@@ -191,7 +175,7 @@
       const data = await res.json().catch(() => ({}));
       if(!res.ok) throw new Error(data.error || 'The tutor could not respond.');
 
-      const answer = cleanMathText(data.answer || 'I could not generate an answer for that one.');
+      const answer = data.answer || 'I could not generate an answer for that one.';
       addBubble('ai', answer);
       messages.push({role:'assistant', content:answer});
       messages = messages.slice(-12);
