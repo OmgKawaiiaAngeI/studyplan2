@@ -23,4 +23,7 @@
   loadAsset('plannerV3Styles','link',{rel:'stylesheet',href:'planner-v3.css?v=1'});loadAsset('plannerV3Script','script',{src:'planner-v3.js?v=1'});
   loadAsset('focusGardenStyles','link',{rel:'stylesheet',href:'focus-garden.css?v=1'});loadAsset('focusGardenScript','script',{src:'focus-garden.js?v=1'});
   loadAsset('mistakeSyncV3Script','script',{src:'mistake-sync-v3.js?v=1'});
+  loadAsset('asterlysHomeStyles','link',{rel:'stylesheet',href:'asterlys-home-v4.css?v=1'});
+  loadAsset('asterlysHomeScript','script',{src:'asterlys-home-v4.js?v=1'});
+  loadAsset('assistantNotesV4','script',{src:'assistant-notes-v4.js?v=1'});
 })();
