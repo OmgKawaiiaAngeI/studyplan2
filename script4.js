@@ -172,3 +172,15 @@ document.querySelectorAll('.tab').forEach(tab=>{
   });
 });
 renderProgressTab();
+
+/* ---------------- Cute dashboard + richer flashcards ---------------- */
+if(!document.getElementById('cuteDashboardStyles')){
+  const css=document.createElement('link');css.id='cuteDashboardStyles';css.rel='stylesheet';css.href='cute-dashboard.css?v=1';document.head.appendChild(css);
+}
+window.addEventListener('load',()=>{
+  const load=(id,src)=>new Promise(resolve=>{
+    if(document.getElementById(id)) return resolve();
+    const s=document.createElement('script');s.id=id;s.src=src;s.onload=resolve;s.onerror=resolve;document.body.appendChild(s);
+  });
+  load('flashcardMoreScript','flashcard-more.js?v=1').then(()=>load('dashboardScript','dashboard.js?v=1'));
+});
