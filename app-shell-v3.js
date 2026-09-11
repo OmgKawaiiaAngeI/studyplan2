@@ -28,4 +28,5 @@
   loadAsset('assistantNotesV4','script',{src:'assistant-notes-v4.js?v=1'});
   loadAsset('workflowNotebookV5Styles','link',{rel:'stylesheet',href:'workflow-notebook-v5.css?v=1'});
   loadAsset('workflowNotebookV5Script','script',{src:'workflow-notebook-v5.js?v=1'});
+  loadAsset('workflowNotebookV5Fixes','script',{src:'workflow-notebook-v5-fixes.js?v=1'});
 })();
