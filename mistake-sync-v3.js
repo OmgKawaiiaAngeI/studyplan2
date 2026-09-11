@@ -8,7 +8,7 @@
     listEl.querySelectorAll('[data-v3retry]').forEach(b=>b.onclick=()=>{const m=read()[+b.dataset.v3retry];if(!m)return;try{qQuickMode=false;qSubject=m.subject;const sel=$('qSubject');if(sel)sel.value=qSubject;const deck=qCurrentDeck();const found=deck.findIndex(x=>x.q===m.q);qIndex=found>=0?found:Math.max(0,m.idx||0);qRenderQuestion();window.studyAppShow?.('questions')}catch{window.studyAppShow?.('study')}});
   }
   function install(){const view=$('view-mistakes'),btn=$('testSubmit');if(!view||!btn){setTimeout(install,120);return}const clear=$('clearMasteredMistakes');if(clear&&!clear.dataset.v3){const clean=clear.cloneNode(true);clean.dataset.v3='1';clear.replaceWith(clean);clean.onclick=()=>{save(read().filter(m=>!m.mastered));render()}}
-    if(!btn.dataset.mistakeSync){btn.dataset.mistakeSync='1';btn.addEventListener('click',()=>setTimeout(()=>{const f=($('testFeedback')?.textContent||'').trim();if(!/^answer:/i.test(f))return;const q=$('testQ')?.textContent||'',answer=f.replace(/^answer:\s*/i,''),topic=$('testTopic')?.value||'Test Mode';if(q&&answer)addTestMistake(topic,q,answer)},20))}
+    if(!btn.dataset.mistakeSync){btn.dataset.mistakeSync='1';btn.addEventListener('click',()=>setTimeout(()=>{const f=($('testFeedback')?.textContent||'').trim();const wrong=/^(?:not quite\.\s*)?answer:/i.test(f);if(!wrong)return;const q=$('testQ')?.textContent||'',answer=f.replace(/^(?:not quite\.\s*)?answer:\s*/i,''),topic=$('testTopic')?.value||'Test Mode';if(q&&answer)addTestMistake(topic,q,answer)},20))}
     new MutationObserver(()=>{if(view.classList.contains('active'))render()}).observe(view,{attributes:true,attributeFilter:['class']});render();
   }
   install();
