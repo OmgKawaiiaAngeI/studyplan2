@@ -16,33 +16,42 @@
   let sb=null;
   const safe=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   function setAccount(profile){cached={id:profile.id,username:profile.username,email:profile.email||''};activeId=profile.id;rawSet(SESSION_CACHE,JSON.stringify(cached));}
+  function migrateKeys(fromPrefix,newId){
+    const to=`sp6:u:${newId}:`,ks=[];
+    for(let i=0;i<localStorage.length;i++){const k=native.key.call(localStorage,i);if(k?.startsWith(fromPrefix))ks.push(k)}
+    for(const k of ks){const dest=to+k.slice(fromPrefix.length);if(rawGet(dest)===null){const v=rawGet(k);if(v!==null)rawSet(dest,v)}}
+  }
   function migrateOldData(newId,username){
+    // carry over data from a previous local-only account with the same username, if any existed
     let oldId='';try{oldId=native.get.call(sessionStorage,'sp6:session')||''}catch{}
     if(!oldId){try{const arr=JSON.parse(rawGet('sp6:accounts')||'[]');oldId=arr.find(a=>String(a.username).toLowerCase()===String(username).toLowerCase())?.id||''}catch{}}
-    if(!oldId||oldId===newId)return;
-    const from=`sp6:u:${oldId}:`,to=`sp6:u:${newId}:`,ks=[];
-    for(let i=0;i<localStorage.length;i++){const k=native.key.call(localStorage,i);if(k?.startsWith(from))ks.push(k)}
-    for(const k of ks){const dest=to+k.slice(from.length);if(rawGet(dest)===null){const v=rawGet(k);if(v!==null)rawSet(dest,v)}}
+    if(oldId&&oldId!==newId)migrateKeys(`sp6:u:${oldId}:`,newId);
+    // carry over any study progress made on this browser before signing in at all
+    migrateKeys('sp6:locked:',newId);
   }
+  const EMAIL_DOMAIN='studyplan2.local';
+  const emailFor=username=>`${username}@${EMAIL_DOMAIN}`;
   async function loadProfile(user){
     const {data,error}=await sb.from('profiles').select('id,username,display_name,bio,avatar_url,banner_url,points,is_owner,equipped_avatar_frame,equipped_profile_border').eq('id',user.id).single();
     if(error)throw error;return {...data,email:user.email||''};
   }
   function gate(){
     if(document.getElementById('sp9AccountGate'))return;
-    const g=document.createElement('div');g.id='sp9AccountGate';g.innerHTML=`<div class="sp6-account-card"><div class="sp6-account-kicker">Study Planner</div><h1>Welcome to your study space</h1><p>Your account now works across devices. Create an account or sign in below.</p><form id="sp9Form"><label id="sp9NameLabel">Username<input id="sp9Username" maxlength="24" autocomplete="username"></label><label>Email<input id="sp9Email" type="email" autocomplete="email" required></label><label>Password<input id="sp9Password" type="password" minlength="6" maxlength="128" autocomplete="current-password" required></label><button type="submit">Sign in</button></form><button id="sp9Mode" class="sp6-link-btn" type="button">Create an account</button><div id="sp9Msg" class="sp6-account-msg"></div><small>Your private study data stays separated by account. Profiles and social features are stored securely in Supabase.</small></div>`;
-    document.body.appendChild(g);let mode='login';const form=g.querySelector('#sp9Form'),nameLabel=g.querySelector('#sp9NameLabel'),btn=form.querySelector('button'),toggle=g.querySelector('#sp9Mode'),msg=g.querySelector('#sp9Msg');
-    const draw=()=>{const create=mode==='create';nameLabel.style.display=create?'grid':'none';g.querySelector('#sp9Username').required=create;btn.textContent=create?'Create account':'Sign in';toggle.textContent=create?'I already have an account':'Create an account';msg.textContent=''};draw();
+    const g=document.createElement('div');g.id='sp9AccountGate';g.innerHTML=`<div class="sp6-account-card"><div class="sp6-account-kicker">Study Planner</div><h1>Welcome to your study space</h1><p>Your account now works across devices. Create an account or sign in below.</p><form id="sp9Form"><label>Username<input id="sp9Username" maxlength="24" autocomplete="username" required></label><label>Password<input id="sp9Password" type="password" minlength="6" maxlength="128" autocomplete="current-password" required></label><button type="submit">Sign in</button></form><button id="sp9Mode" class="sp6-link-btn" type="button">Create an account</button><div id="sp9Msg" class="sp6-account-msg"></div><small>Your private study data stays separated by account. Profiles and social features are stored securely in Supabase.</small></div>`;
+    document.body.appendChild(g);let mode='login';const form=g.querySelector('#sp9Form'),btn=form.querySelector('button'),toggle=g.querySelector('#sp9Mode'),msg=g.querySelector('#sp9Msg');
+    const draw=()=>{const create=mode==='create';btn.textContent=create?'Create account':'Sign in';toggle.textContent=create?'I already have an account':'Create an account';msg.textContent=''};draw();
     toggle.onclick=()=>{mode=mode==='login'?'create':'login';draw()};
     form.onsubmit=async e=>{e.preventDefault();msg.textContent='Checking…';btn.disabled=true;try{
-      const email=g.querySelector('#sp9Email').value.trim().toLowerCase(),password=g.querySelector('#sp9Password').value,username=g.querySelector('#sp9Username').value.trim().toLowerCase();
+      const username=g.querySelector('#sp9Username').value.trim().toLowerCase(),password=g.querySelector('#sp9Password').value,email=emailFor(username);
       if(mode==='create'){
         if(!/^[a-z0-9_]{3,24}$/.test(username))throw new Error('Username must be 3–24 letters, numbers, or underscores.');
         const {data,error}=await sb.auth.signUp({email,password,options:{data:{username}}});if(error)throw error;
-        if(!data.session){msg.textContent='Check your email to confirm your account, then come back and sign in.';return}
-        const p=await loadProfile(data.user);migrateOldData(p.id,p.username);setAccount(p);location.reload();
+        if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('That username is already taken.');
+        let session=data.session,user=data.user;
+        if(!session){const r=await sb.auth.signInWithPassword({email,password});if(r.error)throw r.error;session=r.data.session;user=r.data.user}
+        const p=await loadProfile(user);migrateOldData(p.id,p.username);setAccount(p);location.reload();
       }else{
-        const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;
+        const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw new Error(/invalid/i.test(error.message)?'Wrong username or password.':error.message);
         const p=await loadProfile(data.user);migrateOldData(p.id,p.username);setAccount(p);location.reload();
       }
     }catch(err){msg.textContent=err?.message||'Could not sign in.'}finally{btn.disabled=false}};
