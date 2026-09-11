@@ -182,7 +182,7 @@ window.addEventListener('load',()=>{
     if(document.getElementById(id)) return resolve();
     const s=document.createElement('script');s.id=id;s.src=src;s.onload=resolve;s.onerror=resolve;document.body.appendChild(s);
   });
-  load('flashcardMoreScript','flashcard-more.js?v=1').then(()=>load('dashboardScript','dashboard.js?v=1'));
+  load('flashcardMoreScript','flashcard-more.js?v=1').then(()=>load('dashboardScript','dashboard.js?v=2'));
 
   if(!document.getElementById('rewardStyles')){
     const css=document.createElement('link');css.id='rewardStyles';css.rel='stylesheet';css.href='rewards.css?v=1';document.head.appendChild(css);

@@ -15,7 +15,7 @@ wait(()=>{
  const side=$('appSideNav'),main=document.querySelector('.app-main-area');
  if(!side||!main||!window.studyAppShow)return false;
  // Minimal navigation labels, preserving destinations.
- const labels={dashboard:'Home',planner:'Study Plan',mynotes:'Notes',checkins:'My Work',progress:'Progress',mistakes:'Mistake Book',rewards:'Settings & Rewards',tutor:'AI Study Team'};
+ const labels={dashboard:'Home',planner:'Study Plan',mynotes:'Notes',checkins:'My Work',progress:'Progress',mistakes:'Mistake Book',rewards:'Settings & Rewards'};
  side.querySelectorAll('button[data-shellgo]').forEach(b=>{const key=b.dataset.shellgo;if(labels[key])b.textContent=labels[key]});
  if(!side.querySelector('[data-shellgo="workflow"]')){
    const notes=side.querySelector('[data-shellgo="mynotes"]');
