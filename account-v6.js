@@ -52,14 +52,28 @@
     keys.forEach(rawRemove);
   }
   function migrateLegacy(id){
-    if(rawGet(MIGRATED_KEY))return;
+    if(rawGet(MIGRATED_KEY))return {moved:0,failed:0,done:true};
     const keys=[];
     for(let i=0;i<localStorage.length;i++){
       const k=native.key.call(localStorage,i);
       if(k&&!k.startsWith(SYS_PREFIX))keys.push(k);
     }
-    keys.forEach(k=>{const v=rawGet(k);if(v!==null)rawSet(`sp6:u:${id}:${k}`,v);rawRemove(k)});
-    rawSet(MIGRATED_KEY,JSON.stringify({to:id,at:Date.now(),count:keys.length}));
+    let moved=0,failed=0;
+    for(const k of keys){
+      const v=rawGet(k);if(v===null)continue;
+      const target=`sp6:u:${id}:${k}`;
+      try{
+        rawSet(target,v);
+        if(rawGet(target)===v){rawRemove(k);moved++}else failed++;
+      }catch{failed++}
+    }
+    if(failed===0)rawSet(MIGRATED_KEY,JSON.stringify({to:id,at:Date.now(),count:moved}));
+    else rawSet('sp6:migrationPending',JSON.stringify({to:id,at:Date.now(),moved,failed}));
+    return {moved,failed,done:failed===0};
+  }
+  function retryPendingMigration(id){
+    if(rawGet(MIGRATED_KEY))return {done:true};
+    return migrateLegacy(id);
   }
   function startSession(id){
     activeId=id;
@@ -100,19 +114,25 @@
       const password=document.getElementById('sp6Password').value;
       if(!username||password.length<4){msg.textContent='Use an account name and a password with at least 4 characters.';return}
       const all=loadAccounts();
-      if(mode==='create'){
-        if(all.some(a=>a.username.toLowerCase()===username.toLowerCase())){msg.textContent='That account name already exists.';return}
-        const salt=crypto.getRandomValues(new Uint8Array(16));
-        const hash=await derive(password,salt);
-        const id=crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        all.push({id,username,salt:bytesToB64(salt),hash,created:Date.now()});saveAccounts(all);migrateLegacy(id);startSession(id);location.reload();
-      }else{
-        const a=all.find(x=>x.username.toLowerCase()===username.toLowerCase());
-        if(!a){msg.textContent='Account not found.';return}
-        const hash=await derive(password,b64ToBytes(a.salt));
-        if(hash!==a.hash){msg.textContent='Incorrect password.';return}
-        startSession(a.id);location.reload();
-      }
+      try{
+        if(mode==='create'){
+          if(all.some(a=>a.username.toLowerCase()===username.toLowerCase())){msg.textContent='That account name already exists.';return}
+          const salt=crypto.getRandomValues(new Uint8Array(16));
+          const hash=await derive(password,salt);
+          const id=crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          all.push({id,username,salt:bytesToB64(salt),hash,created:Date.now()});saveAccounts(all);
+          const migration=migrateLegacy(id);
+          if(!migration.done)msg.textContent='Your account was created. Some older data could not be moved yet, so it was left untouched and will be retried on sign-in.';
+          startSession(id);location.reload();
+        }else{
+          const a=all.find(x=>x.username.toLowerCase()===username.toLowerCase());
+          if(!a){msg.textContent='Account not found.';return}
+          const hash=await derive(password,b64ToBytes(a.salt));
+          if(hash!==a.hash){msg.textContent='Incorrect password.';return}
+          retryPendingMigration(a.id);
+          startSession(a.id);location.reload();
+        }
+      }catch(err){msg.textContent='Your data was not deleted. Something interrupted sign-in; please try again.';}
     };
   }
 
@@ -123,7 +143,7 @@
       if(!side){setTimeout(wait,120);return}
       if(document.getElementById('sp6AccountBox'))return;
       const box=document.createElement('div');box.id='sp6AccountBox';box.className='sp6-account-box';
-      box.innerHTML=`<span>Signed in as</span><strong>${String(a.username).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}</strong><button type="button">Log out</button>`;
+      box.innerHTML=`<span>Signed in as</span><strong>${String(a.username).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]))}</strong><button type="button">Log out</button>`;
       box.querySelector('button').onclick=logout;side.appendChild(box);
     };wait();
   }
@@ -134,7 +154,8 @@
     logout,
     rawGet,rawSet,rawRemove,
     list:loadAccounts,
-    prefix:()=>prefix()
+    prefix:()=>prefix(),
+    retryMigration:()=>activeId?retryPendingMigration(activeId):{done:false}
   };
   document.addEventListener('DOMContentLoaded',()=>{if(!activeId)overlay();else ensureAccountBadge()});
 })();
