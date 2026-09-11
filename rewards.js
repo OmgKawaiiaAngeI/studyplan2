@@ -45,7 +45,7 @@
     const tabs=document.querySelector('.tabs'), wrap=document.querySelector('.wrap');
     if(!tabs||!wrap) return;
     if(!document.querySelector('[data-view="rewards"]')){
-      const tab=document.createElement('div'); tab.className='tab'; tab.dataset.view='rewards'; tab.textContent='Rewards';
+      const tab=document.createElement('div'); tab.className='tab'; tab.dataset.view='rewards'; tab.textContent='Settings';
       const progress=tabs.querySelector('[data-view="progress"]'); tabs.insertBefore(tab,progress||null);
       tab.addEventListener('click',()=>{
         document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===tab));
@@ -99,13 +99,11 @@
     if(renderRowsToo) renderRows();
   }
 
-  // Practice questions: award exactly 2 when marked correct.
   if(typeof qRecordAttempt === 'function'){
     const original=qRecordAttempt;
     qRecordAttempt=function(subject,correct){ original(subject,correct); if(correct) award(2); };
   }
 
-  // Flashcards: Again means not known; Hard/Good/Easy count as known.
   document.addEventListener('click',e=>{
     const btn=e.target.closest?.('#view-flashcards [data-rate]');
     if(btn && btn.dataset.rate && btn.dataset.rate!=='again') award(2);
@@ -123,5 +121,6 @@
   hookAnswerButton('learnCheck','learnFeedback','learnQ');
   hookAnswerButton('testSubmit','testFeedback','testQ');
 
-  mountSettings(); setTimeout(()=>{mountDashboard(); renderAll();},0);
+  mountSettings();
+  [0,500,1500,3000].forEach(ms=>setTimeout(()=>{mountDashboard();renderAll();},ms));
 })();
