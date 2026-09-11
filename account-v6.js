@@ -85,6 +85,7 @@
     activeId='';location.reload();
   }
   function currentAccount(){return loadAccounts().find(a=>a.id===activeId)||null}
+  const safe=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
   function overlay(){
     if(document.getElementById('sp6AccountGate'))return;
@@ -143,7 +144,7 @@
       if(!side){setTimeout(wait,120);return}
       if(document.getElementById('sp6AccountBox'))return;
       const box=document.createElement('div');box.id='sp6AccountBox';box.className='sp6-account-box';
-      box.innerHTML=`<span>Signed in as</span><strong>${String(a.username).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]))}</strong><button type="button">Log out</button>`;
+      box.innerHTML=`<span>Signed in as</span><strong>${safe(a.username)}</strong><button type="button">Log out</button>`;
       box.querySelector('button').onclick=logout;side.appendChild(box);
     };wait();
   }
