@@ -1,0 +1,23 @@
+(() => {
+  const $=id=>document.getElementById(id), KEY='focusGardenV1';
+  const plants={sunflower:{name:'Sunflower',full:'🌻',stages:['🟤','🌱','🌿','🌿🟢','🌻']},cactus:{name:'Cactus',full:'🌵',stages:['🟤','🌱','🌵','🌵🌵','🌵🌸']},flower:{name:'Cherry Blossom',full:'🌸',stages:['🟤','🌱','🌿','🌷','🌸']}};
+  const fresh=()=>({active:'sunflower',minutes:0,garden:[]});
+  function load(){try{return Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{return fresh()}}
+  function save(s){localStorage.setItem(KEY,JSON.stringify(s))}
+  function stage(min){return min>=120?5:min>=75?4:min>=50?3:min>=25?2:1}
+  function wait(n=50){const timer=$('timerDisplay'),main=document.querySelector('.app-main-area');if(!timer||!main||typeof timerTick!=='function'){if(n)setTimeout(()=>wait(n-1),100);return}if($('view-focus'))return;mount(main,timer.closest('.panel'))}
+  function mount(main,timerPanel){
+    const view=document.createElement('div');view.className='view';view.id='view-focus';view.innerHTML=`<div class="focus-garden-wrap"><div class="panel plant-card"><div class="plant-art" id="plantArt"></div><div class="plant-title" id="plantTitle"></div><div class="plant-minutes" id="plantMinutes"></div><div class="plant-progress"><i id="plantProgressFill"></i></div><div class="plant-stage" id="plantStage"></div><div class="plant-picker"><button class="plant-pick" data-plant="sunflower">🌻 Sunflower</button><button class="plant-pick" data-plant="cactus">🌵 Cactus</button><button class="plant-pick" data-plant="flower">🌸 Cherry Blossom</button></div><button class="fc-btn secondary garden-btn" id="gardenToggle">🌿 My Garden</button><div class="garden-panel" id="gardenPanel"><h3>My Garden</h3><div class="garden-grid" id="gardenGrid"></div></div></div></div>`;
+    main.insertBefore(view,main.children[2]||null);view.querySelector('.focus-garden-wrap').appendChild(timerPanel);
+    view.querySelectorAll('[data-plant]').forEach(b=>b.onclick=()=>choose(b.dataset.plant));$('gardenToggle').onclick=()=>{$('gardenPanel').classList.toggle('open');renderGarden()};
+    const focusButton=[...document.querySelectorAll('.study-home-action')].find(b=>b.textContent.includes('Focus'));if(focusButton)focusButton.onclick=()=>window.studyAppShow?.('focus');
+    wrapTimer();render();
+  }
+  function choose(id){const s=load();if(s.minutes>0&&s.active!==id)return;s.active=id;save(s);render()}
+  function render(){const s=load(),p=plants[s.active]||plants.sunflower,st=stage(s.minutes);if(!$('plantArt'))return;$('plantArt').textContent=p.stages[st-1];$('plantArt').className='plant-art stage-'+st;$('plantTitle').textContent=`Growing ${p.name} ${p.full}`;$('plantMinutes').textContent=`${Math.min(120,s.minutes)} / 120 minutes`;$('plantProgressFill').style.width=Math.min(100,s.minutes/120*100)+'%';$('plantStage').textContent=`Stage ${st} of 5${st===5?' · Fully grown':''}`;document.querySelectorAll('[data-plant]').forEach(b=>{b.classList.toggle('active',b.dataset.plant===s.active);b.disabled=s.minutes>0&&b.dataset.plant!==s.active});renderGarden()}
+  function renderGarden(){if(!$('gardenGrid'))return;const s=load();$('gardenGrid').innerHTML=s.garden.length?s.garden.slice().reverse().map(x=>`<div class="garden-item"><span class="emoji">${plants[x.type]?.full||'🌿'}</span><b>${plants[x.type]?.name||'Plant'}</b><small>Completed ${new Date(x.completed).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</small></div>`).join(''):'<div class="garden-empty">No fully grown plants yet. Finish 120 focus minutes to grow your first one 🌱</div>'}
+  function celebratePlant(p){const layer=document.createElement('div');layer.className='focus-celebration';for(let i=0;i<18;i++){const e=document.createElement('span');e.className='focus-petal';e.textContent=i%2?'🌸':'✨';e.style.left=(Math.random()*100)+'vw';e.style.animationDelay=(Math.random()*.5)+'s';layer.appendChild(e)}document.body.appendChild(layer);setTimeout(()=>layer.remove(),2300);if(typeof celebrate==='function')celebrate(`Your ${p.name} is fully grown! ${p.full}`)}
+  function addMinutes(min){if(!min||min<1)return;const s=load(),p=plants[s.active]||plants.sunflower;s.minutes+=min;if(s.minutes>=120){s.garden.push({id:crypto.randomUUID(),type:s.active,completed:new Date().toISOString()});save(s);celebratePlant(p);s.minutes=0;save(s)}else save(s);render()}
+  function wrapTimer(){const original=timerTick;timerTick=function(){const before=timerMode;original();if(before==='focus'&&timerMode==='break'){const mins=Math.max(1,Math.round(+($('focusMinutesInput')?.value||25)));addMinutes(mins)}}}
+  window.addEventListener('storage',render);wait();
+})();
