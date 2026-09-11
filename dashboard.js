@@ -1,0 +1,55 @@
+(() => {
+  const $=id=>document.getElementById(id);
+  const tabs=document.querySelector('.tabs'),wrap=document.querySelector('.wrap');
+  if(!tabs||!wrap||$('view-dashboard')) return;
+  const tab=document.createElement('div');tab.className='tab';tab.dataset.view='dashboard';tab.textContent='Dashboard';tabs.insertBefore(tab,tabs.firstChild);
+  const view=document.createElement('div');view.className='view';view.id='view-dashboard';
+  view.innerHTML=`<div class="dash-shell">
+    <div class="panel dash-hero"><div><div class="dash-kicker">Your study home</div><h2>Hi! Ready for a little progress today? 🌷</h2><p id="dashMessage">Your dashboard pulls together your planner, flashcards, mistakes, practice and AI Team so you can decide what to do next quickly.</p></div><div class="dash-progress-ring" id="dashRing"><div><strong id="dashBookPct">0%</strong><span>book progress</span></div></div></div>
+    <div class="dash-grid"><div class="dash-stat"><b id="dashStreak">0</b><span>day streak 🔥</span></div><div class="dash-stat"><b id="dashXP">0</b><span>XP earned ✨</span></div><div class="dash-stat"><b id="dashMistakes">0</b><span>mistakes to review 📕</span></div><div class="dash-stat"><b id="dashCards">0</b><span>flashcards available 🧠</span></div></div>
+    <div class="dash-main"><div class="panel"><div class="suite-title"><div><h2>Quick start</h2><p>Jump straight into what you need.</p></div></div><div class="dash-actions">
+      <button class="dash-action" data-dashgo="planner"><b>🗓️ Continue planner</b><small>See today’s pages and schedule</small></button>
+      <button class="dash-action" data-dashgo="flashcards"><b>🧠 Review flashcards</b><small>Use spaced repetition</small></button>
+      <button class="dash-action" data-dashgo="learn"><b>🎯 Learn mode</b><small>Adaptive active recall</small></button>
+      <button class="dash-action" data-dashgo="test"><b>🧪 Take a test</b><small>Timed or untimed practice</small></button>
+      <button class="dash-action" data-dashgo="mistakes"><b>📕 Fix mistakes</b><small>Retry questions you missed</small></button>
+      <button class="dash-action" data-dashgo="tutor"><b>🧠 Ask AI Team</b><small>Manager can choose what to do next</small></button>
+    </div></div>
+    <div class="panel"><h2>What should I do next?</h2><div class="dash-next" id="dashNext"><b>Start with a short review</b><span>Do 5 practice questions, then review anything you miss.</span></div><div class="dash-note">This suggestion updates from your saved progress and mistakes.</div><h2 style="margin-top:18px">At a glance</h2><div class="dash-mini-list" id="dashMini"></div></div></div>
+  </div>`;
+  const firstView=wrap.querySelector('.view');wrap.insertBefore(view,firstView||null);
+
+  function show(name){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===name));
+    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));
+    if(name==='progress'&&typeof renderProgressTab==='function')renderProgressTab();
+  }
+  tab.onclick=()=>{show('dashboard');renderDashboard()};
+  view.querySelectorAll('[data-dashgo]').forEach(b=>b.onclick=()=>show(b.dataset.dashgo));
+
+  function readJSON(key,fallback){try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}}
+  function renderDashboard(){
+    const done=Math.max(0,(typeof pagesDoneUpTo==='number'?pagesDoneUpTo:BOOK_START-1)-BOOK_START+1);
+    const total=typeof TOTAL_PAGES==='number'?TOTAL_PAGES:341;
+    const pct=total?Math.max(0,Math.min(100,Math.round(done/total*100))):0;
+    $('dashBookPct').textContent=pct+'%';$('dashRing').style.setProperty('--dash-pct',pct+'%');
+    const gs=typeof gState==='object'&&gState?gState:readJSON('gState',{});
+    $('dashStreak').textContent=gs.streakCount||0;$('dashXP').textContent=gs.xp||0;
+    const mistakes=readJSON('mistakeBookV2',[]);const active=Array.isArray(mistakes)?mistakes.filter(m=>!m.mastered).length:0;$('dashMistakes').textContent=active;
+    let cardCount=0;try{Object.values(flashcards).forEach(deck=>cardCount+=deck.length)}catch{}$('dashCards').textContent=cardCount;
+    let nextTitle='Start with a short review',nextText='Do 5 practice questions, then review anything you miss.';
+    if(active>0){nextTitle=`Review ${Math.min(active,5)} saved mistake${active===1?'':'s'}`;nextText='Fixing recent mistakes usually gives you the fastest improvement.'}
+    else if(pct<100&&typeof buildSchedule==='function'){
+      const schedule=buildSchedule(),next=schedule.find(d=>d.endPage>pagesDoneUpTo);
+      if(next){nextTitle=`Continue pages ${next.startPage}–${next.endPage}`;nextText=(next.topics||[]).map(t=>t[1]).slice(0,2).join(' • ')||'Continue your planned book work.'}
+    }
+    $('dashNext').innerHTML=`<b>${nextTitle}</b><span>${nextText}</span>`;
+    const due=(()=>{try{const s=readJSON('fcSrsV2',{});let n=0;Object.keys(s).forEach(k=>{if(s[k]&&s[k].reviews>0&&s[k].due<=Date.now())n++});return n}catch{return 0}})();
+    const attempts=typeof qAttempts==='object'&&qAttempts?qAttempts:{};let right=0,wrong=0;Object.values(attempts).forEach(x=>{right+=x.right||0;wrong+=x.wrong||0});const acc=right+wrong?Math.round(right/(right+wrong)*100):null;
+    $('dashMini').innerHTML=`<div class="dash-mini-item"><span>Flashcards due</span><span>${due}</span></div><div class="dash-mini-item"><span>Practice accuracy</span><span>${acc===null?'No attempts yet':acc+'%'}</span></div><div class="dash-mini-item"><span>Book pages done</span><span>${done} / ${total}</span></div>`;
+  }
+
+  // Make Dashboard the home view on load without removing access to Planner.
+  setTimeout(()=>{show('dashboard');renderDashboard()},0);
+  window.addEventListener('storage',renderDashboard);
+})();
