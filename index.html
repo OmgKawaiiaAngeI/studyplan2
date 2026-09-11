@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="tutor.css?v=3">
+<link rel="stylesheet" href="study-upgrades.css?v=1">
 <script>
   window.MathJax = {
     tex: {
@@ -54,38 +55,12 @@
 
   <div class="view" id="view-tutor">
     <div class="panel tutor-panel">
-      <div class="tutor-title-row">
-        <div class="tutor-avatar">🧠</div>
-        <div><h2 style="margin-bottom:2px;">CSEC Maths AI Tutor</h2><div class="tutor-sub">Built for CSEC General Proficiency Mathematics</div></div>
-      </div>
-      <div class="tutor-modes" id="tutorModes">
-        <button class="tutor-mode active" data-mode="teach">Teach me</button>
-        <button class="tutor-mode" data-mode="hint">Hint only</button>
-        <button class="tutor-mode" data-mode="check">Check my work</button>
-        <button class="tutor-mode" data-mode="practice">Practice me</button>
-      </div>
-      <select id="tutorTopic" class="tutor-topic">
-        <option value="auto">Auto-detect topic</option>
-        <option>Computation</option><option>Number Theory</option><option>Consumer Arithmetic</option><option>Sets</option><option>Measurement</option><option>Statistics</option><option>Algebra</option><option>Relations, Functions and Graphs</option><option>Geometry and Trigonometry</option><option>Vectors and Matrices</option>
-      </select>
-      <div class="tutor-upload" id="tutorUpload" hidden>
-        <input type="file" id="tutorImage" accept="image/*" capture="environment" hidden>
-        <button type="button" class="tutor-photo-btn" id="tutorPhotoBtn">📷 Upload a photo of your work</button>
-        <div class="tutor-preview-wrap" id="tutorPreviewWrap" hidden>
-          <img id="tutorPreview" alt="Selected maths work">
-          <div class="tutor-preview-info"><span id="tutorImageName">Photo selected</span><button type="button" id="tutorRemoveImage">Remove</button></div>
-        </div>
-        <div class="tutor-photo-help">Choose a clear photo showing the question and your working. The tutor can read the image and check your steps.</div>
-      </div>
-      <div class="tutor-chat" id="tutorChat">
-        <div class="tutor-msg ai"><div class="tutor-bubble"><b>Hi! I’m your CSEC Maths tutor.</b><br>Send me a question, tell me what topic is confusing you, or ask me to give you practice. I’ll explain it in CSEC style and show the working step by step.</div></div>
-      </div>
-      <div class="tutor-status" id="tutorStatus"></div>
-      <div class="tutor-input-row">
-        <textarea id="tutorInput" rows="2" maxlength="3000" placeholder="Ask a CSEC maths question..."></textarea>
-        <button id="tutorSend" class="tutor-send">Send</button>
-      </div>
-      <div class="tutor-actions"><button id="tutorClear" class="tutor-clear">Clear chat</button><span>AI can make mistakes — check important answers.</span></div>
+      <div class="tutor-title-row"><div class="tutor-avatar">🧠</div><div><h2 style="margin-bottom:2px;">CSEC Maths AI Tutor</h2><div class="tutor-sub">Built for CSEC General Proficiency Mathematics</div></div></div>
+      <div class="tutor-modes" id="tutorModes"><button class="tutor-mode active" data-mode="teach">Teach me</button><button class="tutor-mode" data-mode="hint">Hint only</button><button class="tutor-mode" data-mode="check">Check my work</button><button class="tutor-mode" data-mode="practice">Practice me</button></div>
+      <select id="tutorTopic" class="tutor-topic"><option value="auto">Auto-detect topic</option><option>Computation</option><option>Number Theory</option><option>Consumer Arithmetic</option><option>Sets</option><option>Measurement</option><option>Statistics</option><option>Algebra</option><option>Relations, Functions and Graphs</option><option>Geometry and Trigonometry</option><option>Vectors and Matrices</option></select>
+      <div class="tutor-upload" id="tutorUpload" hidden><input type="file" id="tutorImage" accept="image/*" capture="environment" hidden><button type="button" class="tutor-photo-btn" id="tutorPhotoBtn">📷 Upload a photo of your work</button><div class="tutor-preview-wrap" id="tutorPreviewWrap" hidden><img id="tutorPreview" alt="Selected maths work"><div class="tutor-preview-info"><span id="tutorImageName">Photo selected</span><button type="button" id="tutorRemoveImage">Remove</button></div></div><div class="tutor-photo-help">Choose a clear photo showing the question and your working. The tutor can read the image and check your steps.</div></div>
+      <div class="tutor-chat" id="tutorChat"><div class="tutor-msg ai"><div class="tutor-bubble"><b>Hi! I’m your CSEC Maths tutor.</b><br>Send me a question, tell me what topic is confusing you, or ask me to give you practice. I’ll explain it in CSEC style and show the working step by step.</div></div></div>
+      <div class="tutor-status" id="tutorStatus"></div><div class="tutor-input-row"><textarea id="tutorInput" rows="2" maxlength="3000" placeholder="Ask a CSEC maths question..."></textarea><button id="tutorSend" class="tutor-send">Send</button></div><div class="tutor-actions"><button id="tutorClear" class="tutor-clear">Clear chat</button><span>AI can make mistakes — check important answers.</span></div>
     </div>
   </div>
 
@@ -93,10 +68,6 @@
 </div>
 <div class="tip-overlay" id="tipOverlay"><div class="tip-card"><div class="tip-emoji" id="tipEmoji">&#127793;</div><div class="tip-heading" id="tipHeading">Quick tip</div><div class="tip-text" id="tipText"></div><button class="fc-btn" id="tipContinue">Continue</button></div></div>
 <div class="celebrate-toast" id="celebrateToast"></div>
-<script src="script1.js"></script>
-<script src="script2.js"></script>
-<script src="script3.js"></script>
-<script src="script4.js"></script>
-<script src="tutor.js?v=3"></script>
+<script src="script1.js"></script><script src="script2.js"></script><script src="script3.js"></script><script src="script4.js"></script><script src="tutor.js?v=3"></script><script src="study-upgrades.js?v=1"></script>
 </body>
 </html>
