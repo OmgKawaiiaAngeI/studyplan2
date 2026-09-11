@@ -22,4 +22,5 @@
   const loadAsset=(id,tag,attrs)=>{if(document.getElementById(id))return;const el=document.createElement(tag);el.id=id;Object.assign(el,attrs);(tag==='link'?document.head:document.body).appendChild(el)};
   loadAsset('plannerV3Styles','link',{rel:'stylesheet',href:'planner-v3.css?v=1'});loadAsset('plannerV3Script','script',{src:'planner-v3.js?v=1'});
   loadAsset('focusGardenStyles','link',{rel:'stylesheet',href:'focus-garden.css?v=1'});loadAsset('focusGardenScript','script',{src:'focus-garden.js?v=1'});
+  loadAsset('mistakeSyncV3Script','script',{src:'mistake-sync-v3.js?v=1'});
 })();
