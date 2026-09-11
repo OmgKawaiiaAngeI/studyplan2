@@ -7,14 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="tutor.css?v=3">
+<link rel="stylesheet" href="tutor.css?v=4">
 <link rel="stylesheet" href="study-upgrades.css?v=1">
 <script>
   window.MathJax = {
-    tex: {
-      inlineMath: [['\\(', '\\)'], ['$', '$']],
-      displayMath: [['\\[', '\\]'], ['$$', '$$']]
-    },
+    tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']] },
     options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
   };
 </script>
@@ -33,7 +30,7 @@
     <div class="tab" data-view="checkins">Check-ins</div>
     <div class="tab" data-view="mynotes">Notes</div>
     <div class="tab" data-view="questions">Questions</div>
-    <div class="tab" data-view="tutor">AI Tutor</div>
+    <div class="tab" data-view="tutor">AI Team</div>
     <div class="tab" data-view="progress">Progress</div>
   </div>
 
@@ -47,7 +44,7 @@
 
   <div class="view" id="view-flashcards"><div class="panel"><h2>Pick a topic</h2><select id="topicSelect"></select><div class="fc-progress" id="fcProgress"></div><textarea class="explain-box" id="fcExplain" placeholder="Try answering in your own words before you flip (optional)..."></textarea><div class="fc-stage"><div class="fc-card" id="fcCard"><div class="fc-face fc-front" id="fcFront"></div><div class="fc-face fc-back" id="fcBack"></div></div></div><div class="fc-controls"><button class="fc-btn secondary" id="fcPrev">&larr; Prev</button><button class="fc-btn" id="fcFlip">Flip</button><button class="fc-btn secondary" id="fcNext">Next &rarr;</button></div><div class="know-row"><button class="know-btn know-no" id="fcStillLearning">Still learning</button><button class="know-btn know-yes" id="fcKnowIt">I know this (+1 XP)</button></div><div class="fc-controls" style="margin-top:8px;"><button class="fc-btn secondary" id="fcShuffle">&#128256; Shuffle</button></div></div></div>
 
-  <div class="view" id="view-checkins"><div class="panel"><h2>Check my work</h2><div class="ci-howto"><b>How this works:</b> after you attempt a page range, snap a photo of your work and send it to Claude in chat — say something like "check my work, pages 10–16." Claude will mark it up and tell you what to fix. Log the result here afterward so you can see your patterns over time.</div><div class="ci-form"><input type="date" id="ciDate"><select id="ciTopic"></select><div class="ci-status"><div class="ci-status-btn" data-status="good">Nailed it</div><div class="ci-status-btn" data-status="mixed">Some mistakes</div><div class="ci-status-btn" data-status="tough">Struggled</div></div><textarea id="ciNotes" placeholder="What Claude flagged, or what to review again..."></textarea><button class="fc-btn" id="ciAdd" style="align-self:flex-start;">+ Add entry</button></div></div><div class="panel"><h2>Your log</h2><div id="ciList"></div></div></div>
+  <div class="view" id="view-checkins"><div class="panel"><h2>Check my work</h2><div class="ci-howto"><b>How this works:</b> after you attempt a page range, snap a photo of your work and send it to the AI Team. Log the result here afterward so you can see your patterns over time.</div><div class="ci-form"><input type="date" id="ciDate"><select id="ciTopic"></select><div class="ci-status"><div class="ci-status-btn" data-status="good">Nailed it</div><div class="ci-status-btn" data-status="mixed">Some mistakes</div><div class="ci-status-btn" data-status="tough">Struggled</div></div><textarea id="ciNotes" placeholder="What the AI Team flagged, or what to review again..."></textarea><button class="fc-btn" id="ciAdd" style="align-self:flex-start;">+ Add entry</button></div></div><div class="panel"><h2>Your log</h2><div id="ciList"></div></div></div>
 
   <div class="view" id="view-mynotes"><div class="panel"><h2>Add a note</h2><div class="mn-form"><input type="text" id="mnCategory" list="mnCategoryList" placeholder="Section (e.g. Sets, Fractions, Significant Figures)"><datalist id="mnCategoryList"></datalist><input type="text" id="mnTitle" placeholder="Title (e.g. Whole numbers to fractions)"><textarea id="mnBody" placeholder="Write it out however makes sense to you..."></textarea><button class="fc-btn" id="mnAdd" style="align-self:flex-start;">+ Save note</button></div></div><div class="panel"><h2>Saved notes</h2><div id="mnList"></div></div></div>
 
@@ -55,12 +52,34 @@
 
   <div class="view" id="view-tutor">
     <div class="panel tutor-panel">
-      <div class="tutor-title-row"><div class="tutor-avatar">🧠</div><div><h2 style="margin-bottom:2px;">CSEC Maths AI Tutor</h2><div class="tutor-sub">Built for CSEC General Proficiency Mathematics</div></div></div>
-      <div class="tutor-modes" id="tutorModes"><button class="tutor-mode active" data-mode="teach">Teach me</button><button class="tutor-mode" data-mode="hint">Hint only</button><button class="tutor-mode" data-mode="check">Check my work</button><button class="tutor-mode" data-mode="practice">Practice me</button></div>
+      <div class="tutor-title-row"><div class="tutor-avatar">🧠</div><div><h2 style="margin-bottom:2px;">AI Study Team</h2><div class="tutor-sub">Manager + specialist agents working together for CSEC Maths</div></div></div>
+      <div class="agent-label">Talk to</div>
+      <div class="agent-grid" id="agentGrid">
+        <button class="agent-chip active" data-agent="manager">@Manager</button>
+        <button class="agent-chip" data-agent="researcher">@Researcher</button>
+        <button class="agent-chip" data-agent="questionwriter">@QuestionWriter</button>
+        <button class="agent-chip" data-agent="solver">@Solver</button>
+        <button class="agent-chip" data-agent="verifier">@Verifier</button>
+        <button class="agent-chip" data-agent="tutor">@Tutor</button>
+        <button class="agent-chip" data-agent="mistakes">@Mistakes</button>
+        <button class="agent-chip" data-agent="planner">@Planner</button>
+        <button class="agent-chip" data-agent="examiner">@Examiner</button>
+        <button class="agent-chip" data-agent="flashcards">@Flashcards</button>
+        <button class="agent-chip" data-agent="review">@Review</button>
+        <button class="agent-chip" data-agent="progress">@Progress</button>
+        <button class="agent-chip" data-agent="goaltracker">@GoalTracker</button>
+        <button class="agent-chip" data-agent="studycoach">@StudyCoach</button>
+        <button class="agent-chip" data-agent="notes">@Notes</button>
+        <button class="agent-chip" data-agent="challenge">@Challenge</button>
+        <button class="agent-chip" data-agent="syllabustracker">@SyllabusTracker</button>
+        <button class="agent-chip" data-agent="resourcefinder">@ResourceFinder</button>
+      </div>
+      <div class="manager-note" id="managerNote"><b>Manager mode:</b> just ask normally. Manager will choose the right specialists, check their work, and decide what should happen next.</div>
+      <div class="tutor-modes" id="tutorModes"><button class="tutor-mode active" data-mode="teach">Teach</button><button class="tutor-mode" data-mode="hint">Hint only</button><button class="tutor-mode" data-mode="check">Check work</button><button class="tutor-mode" data-mode="practice">Practice</button></div>
       <select id="tutorTopic" class="tutor-topic"><option value="auto">Auto-detect topic</option><option>Computation</option><option>Number Theory</option><option>Consumer Arithmetic</option><option>Sets</option><option>Measurement</option><option>Statistics</option><option>Algebra</option><option>Relations, Functions and Graphs</option><option>Geometry and Trigonometry</option><option>Vectors and Matrices</option></select>
-      <div class="tutor-upload" id="tutorUpload" hidden><input type="file" id="tutorImage" accept="image/*" capture="environment" hidden><button type="button" class="tutor-photo-btn" id="tutorPhotoBtn">📷 Upload a photo of your work</button><div class="tutor-preview-wrap" id="tutorPreviewWrap" hidden><img id="tutorPreview" alt="Selected maths work"><div class="tutor-preview-info"><span id="tutorImageName">Photo selected</span><button type="button" id="tutorRemoveImage">Remove</button></div></div><div class="tutor-photo-help">Choose a clear photo showing the question and your working. The tutor can read the image and check your steps.</div></div>
-      <div class="tutor-chat" id="tutorChat"><div class="tutor-msg ai"><div class="tutor-bubble"><b>Hi! I’m your CSEC Maths tutor.</b><br>Send me a question, tell me what topic is confusing you, or ask me to give you practice. I’ll explain it in CSEC style and show the working step by step.</div></div></div>
-      <div class="tutor-status" id="tutorStatus"></div><div class="tutor-input-row"><textarea id="tutorInput" rows="2" maxlength="3000" placeholder="Ask a CSEC maths question..."></textarea><button id="tutorSend" class="tutor-send">Send</button></div><div class="tutor-actions"><button id="tutorClear" class="tutor-clear">Clear chat</button><span>AI can make mistakes — check important answers.</span></div>
+      <div class="tutor-upload" id="tutorUpload" hidden><input type="file" id="tutorImage" accept="image/*" capture="environment" hidden><button type="button" class="tutor-photo-btn" id="tutorPhotoBtn">📷 Upload a photo of your work</button><div class="tutor-preview-wrap" id="tutorPreviewWrap" hidden><img id="tutorPreview" alt="Selected maths work"><div class="tutor-preview-info"><span id="tutorImageName">Photo selected</span><button type="button" id="tutorRemoveImage">Remove</button></div></div><div class="tutor-photo-help">Choose a clear photo showing the question and your working.</div></div>
+      <div class="tutor-chat" id="tutorChat"><div class="tutor-msg ai"><div class="tutor-bubble"><b>@Manager is ready.</b><br>Ask me to teach, quiz, check work, analyze mistakes, plan your study session, or decide what you should study next.</div></div></div>
+      <div class="tutor-status" id="tutorStatus"></div><div class="tutor-input-row"><textarea id="tutorInput" rows="2" maxlength="3000" placeholder="Ask @Manager anything about your studying..."></textarea><button id="tutorSend" class="tutor-send">Send</button></div><div class="tutor-actions"><button id="tutorClear" class="tutor-clear">Clear chat</button><span>Agents are coordinated AI roles, not separate background programs.</span></div>
     </div>
   </div>
 
@@ -68,6 +87,6 @@
 </div>
 <div class="tip-overlay" id="tipOverlay"><div class="tip-card"><div class="tip-emoji" id="tipEmoji">&#127793;</div><div class="tip-heading" id="tipHeading">Quick tip</div><div class="tip-text" id="tipText"></div><button class="fc-btn" id="tipContinue">Continue</button></div></div>
 <div class="celebrate-toast" id="celebrateToast"></div>
-<script src="script1.js"></script><script src="script2.js"></script><script src="script3.js"></script><script src="script4.js"></script><script src="tutor.js?v=3"></script><script src="study-upgrades.js?v=1"></script>
+<script src="script1.js"></script><script src="script2.js"></script><script src="script3.js"></script><script src="script4.js"></script><script src="tutor.js?v=4"></script><script src="study-upgrades.js?v=1"></script>
 </body>
 </html>
