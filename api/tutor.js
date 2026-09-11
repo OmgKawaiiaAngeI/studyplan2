@@ -100,9 +100,20 @@ FORMATTING:
 
 Return only JSON matching the requested schema. studentUpdate.memoryNotes should contain ONLY new evidence-based durable study facts worth remembering from this turn. Return an empty array when there is nothing new to store.`;
 
-  const apiInput = messages.map(m => ({ role: m.role, content: [{ type: 'input_text', text: m.content }] }));
+  // The Responses API expects user messages to contain input_text/input_image,
+  // while prior assistant messages must be represented as output_text.
+  const apiInput = messages.map(m => ({
+    role: m.role,
+    content: [{
+      type: m.role === 'assistant' ? 'output_text' : 'input_text',
+      text: m.content
+    }]
+  }));
+
   if (validImage) {
-    if (!apiInput.length || apiInput[apiInput.length - 1].role !== 'user') apiInput.push({ role: 'user', content: [{ type: 'input_text', text: 'Please check the study work in this image.' }] });
+    if (!apiInput.length || apiInput[apiInput.length - 1].role !== 'user') {
+      apiInput.push({ role: 'user', content: [{ type: 'input_text', text: 'Please check the study work in this image.' }] });
+    }
     apiInput[apiInput.length - 1].content.push({ type: 'input_image', image_url: image, detail: 'high' });
   }
 
