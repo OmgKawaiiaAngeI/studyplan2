@@ -183,4 +183,9 @@ window.addEventListener('load',()=>{
     const s=document.createElement('script');s.id=id;s.src=src;s.onload=resolve;s.onerror=resolve;document.body.appendChild(s);
   });
   load('flashcardMoreScript','flashcard-more.js?v=1').then(()=>load('dashboardScript','dashboard.js?v=1'));
+
+  if(!document.getElementById('rewardStyles')){
+    const css=document.createElement('link');css.id='rewardStyles';css.rel='stylesheet';css.href='rewards.css?v=1';document.head.appendChild(css);
+  }
+  load('rewardsScript','rewards.js?v=1');
 });
