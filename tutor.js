@@ -68,9 +68,7 @@
 
   function updateModeUI(){
     if(uploadBox) uploadBox.hidden = mode !== 'check';
-    input.placeholder = agent === 'manager'
-      ? 'Ask @Manager anything about your studying...'
-      : `Ask @${agent}...`;
+    input.placeholder = agent === 'manager' ? 'Ask @Manager anything about your studying...' : `Ask @${agent}...`;
     if(mode !== 'check') clearSelectedImage();
   }
 
@@ -137,27 +135,25 @@
   }
 
   function getStudyContext(){
-    const context = {
+    return {
       pagesDoneUpTo: typeof pagesDoneUpTo !== 'undefined' ? pagesDoneUpTo : null,
       pagesPerDay: typeof pagesPerDay !== 'undefined' ? pagesPerDay : null,
       checkins: readJSON('checkins', readJSON('csecCheckins', [])).slice(-12),
       questionStats: readJSON('questionStats', readJSON('csecQuestionStats', {})),
       weakTopics: readJSON('weakTopics', []),
-      mistakes: readJSON('aiTeamMistakes', []).slice(-30),
-      mastery: readJSON('aiTeamMastery', {}),
-      goals: readJSON('aiTeamGoals', []),
-      recentSessions: readJSON('aiTeamSessions', []).slice(-10)
+      memoryNotes: readJSON('aiTeamMemory', []).slice(-60)
     };
-    return context;
   }
 
   function saveTeamUpdate(update){
-    if(!update || typeof update !== 'object') return;
+    if(!update || !Array.isArray(update.memoryNotes)) return;
     try{
-      if(Array.isArray(update.mistakes)) localStorage.setItem('aiTeamMistakes', JSON.stringify(update.mistakes.slice(-60)));
-      if(update.mastery && typeof update.mastery === 'object') localStorage.setItem('aiTeamMastery', JSON.stringify(update.mastery));
-      if(Array.isArray(update.goals)) localStorage.setItem('aiTeamGoals', JSON.stringify(update.goals.slice(-20)));
-      if(Array.isArray(update.sessions)) localStorage.setItem('aiTeamSessions', JSON.stringify(update.sessions.slice(-30)));
+      const existing = readJSON('aiTeamMemory', []);
+      const merged = [...existing, ...update.memoryNotes]
+        .filter(x => typeof x === 'string' && x.trim())
+        .filter((x, i, arr) => arr.indexOf(x) === i)
+        .slice(-60);
+      localStorage.setItem('aiTeamMemory', JSON.stringify(merged));
     }catch(e){}
   }
 
@@ -165,7 +161,6 @@
     let text = input.value.trim();
     if(!text && !imageData) return;
     if(send.disabled) return;
-
     if(!text && imageData) text = 'Please check my maths work in this photo and explain the first mistake if there is one.';
 
     const mention = text.match(/^@([a-zA-Z]+)/);
@@ -190,7 +185,6 @@
       });
       const data = await res.json().catch(() => ({}));
       if(!res.ok) throw new Error(data.error || 'The AI Team could not respond.');
-
       const answer = data.answer || 'I could not generate an answer for that one.';
       addBubble('ai', answer);
       messages.push({role:'assistant', content:answer});
@@ -208,9 +202,7 @@
   }
 
   send.addEventListener('click', askTutor);
-  input.addEventListener('keydown', e => {
-    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); askTutor(); }
-  });
+  input.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); askTutor(); } });
 
   clear.addEventListener('click', () => {
     messages = [];
