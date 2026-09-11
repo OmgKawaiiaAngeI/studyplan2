@@ -7,6 +7,7 @@
   const clear = document.getElementById('tutorClear');
   const modeButtons = [...document.querySelectorAll('.tutor-mode')];
   const agentButtons = [...document.querySelectorAll('.agent-chip')];
+  const agentNote = document.getElementById('managerNote');
   const uploadBox = document.getElementById('tutorUpload');
   const imageInput = document.getElementById('tutorImage');
   const photoBtn = document.getElementById('tutorPhotoBtn');
@@ -21,6 +22,27 @@
   let agent = 'manager';
   let messages = [];
   let imageData = null;
+
+  const agentInfo = {
+    manager: ['Manager', 'Ask normally. Manager chooses the useful specialists, checks their work, and decides what should happen next.'],
+    researcher: ['Researcher', 'Figures out what should be taught or tested and keeps the work aligned with CSEC/CXC topics and question styles.'],
+    questionwriter: ['QuestionWriter', 'Creates original practice questions at the topic, count, and difficulty you ask for. Answers stay hidden unless you request them.'],
+    solver: ['Solver', 'Solves questions independently, shows enough working to check them, and flags questions that are impossible or unclear.'],
+    verifier: ['Verifier', 'Checks questions, answers, calculations, and your submitted work for mistakes, ambiguity, or missing information.'],
+    tutor: ['Tutor', 'Explains concepts step by step, gives hints without spoiling answers, and reteaches weak areas in a different way when needed.'],
+    mistakes: ['Mistakes', 'Looks at errors you actually made, finds repeated patterns, and identifies what needs another review.'],
+    planner: ['Planner', 'Builds realistic study plans from your goals, weak topics, deadlines, available time, and recent performance.'],
+    examiner: ['Examiner', 'Creates and marks original CSEC-style mock tests while keeping the answer key hidden until you finish.'],
+    flashcards: ['Flashcards', 'Turns lessons and mistakes into short retrieval-practice flashcards, with extra attention on weak areas.'],
+    review: ['Review', 'Decides what older topics and mistakes should return for spaced review based on recency and performance.'],
+    progress: ['Progress', 'Summarizes real score and study trends, showing what is improving, what is weak, and where more evidence is needed.'],
+    goaltracker: ['GoalTracker', 'Breaks a big study goal into milestones and tells you the most useful next milestone based on your progress.'],
+    studycoach: ['StudyCoach', 'Guides the current study session with focused work blocks, short breaks, review, and reflection.'],
+    notes: ['Notes', 'Turns lessons into concise revision notes, formula reminders, worked methods, and exam-ready summaries.'],
+    challenge: ['Challenge', 'Adjusts difficulty toward the edge of what you can currently do, increasing it after success and scaffolding after struggle.'],
+    syllabustracker: ['SyllabusTracker', 'Tracks CSEC Maths topics as not started, learning, needs review, or strong using your actual study evidence.'],
+    resourcefinder: ['ResourceFinder', 'Suggests useful study resources and resource types without inventing links or claiming current availability it cannot verify.']
+  };
 
   function typesetMath(el){
     if(window.MathJax && typeof window.MathJax.typesetPromise === 'function') window.MathJax.typesetPromise([el]).catch(() => {});
@@ -53,9 +75,10 @@
     send.disabled = busy;
     input.disabled = busy;
     topic.disabled = busy;
+    modeButtons.forEach(b => b.disabled = busy);
     agentButtons.forEach(b => b.disabled = busy);
     if(photoBtn) photoBtn.disabled = busy;
-    status.textContent = busy ? (imageData ? 'AI Team is reading your photo…' : '@' + agent + ' is working…') : '';
+    status.textContent = busy ? (imageData ? 'AI Team is reading your photo…' : '@' + (agentInfo[agent]?.[0] || agent) + ' is working…') : '';
   }
 
   function clearSelectedImage(){
@@ -68,7 +91,15 @@
 
   function updateModeUI(){
     if(uploadBox) uploadBox.hidden = mode !== 'check';
-    input.placeholder = agent === 'manager' ? 'Ask @Manager anything about your studying...' : `Ask @${agent}...`;
+    const info = agentInfo[agent] || agentInfo.manager;
+    input.placeholder = agent === 'manager' ? 'Ask @Manager anything about your studying...' : `Ask @${info[0]}...`;
+    if(agentNote){
+      agentNote.innerHTML = '';
+      const strong = document.createElement('b');
+      strong.textContent = info[0] + ': ';
+      agentNote.appendChild(strong);
+      agentNote.appendChild(document.createTextNode(info[1]));
+    }
     if(mode !== 'check') clearSelectedImage();
   }
 
@@ -135,13 +166,14 @@
   }
 
   function getStudyContext(){
+    const checkins = readJSON('checkins', readJSON('csecCheckins', []));
     return {
       pagesDoneUpTo: typeof pagesDoneUpTo !== 'undefined' ? pagesDoneUpTo : null,
       pagesPerDay: typeof pagesPerDay !== 'undefined' ? pagesPerDay : null,
-      checkins: readJSON('checkins', readJSON('csecCheckins', [])).slice(-12),
+      checkins: Array.isArray(checkins) ? checkins.slice(-12) : [],
       questionStats: readJSON('questionStats', readJSON('csecQuestionStats', {})),
-      weakTopics: readJSON('weakTopics', []),
-      memoryNotes: readJSON('aiTeamMemory', []).slice(-60)
+      weakTopics: Array.isArray(readJSON('weakTopics', [])) ? readJSON('weakTopics', []).slice(-20) : [],
+      memoryNotes: Array.isArray(readJSON('aiTeamMemory', [])) ? readJSON('aiTeamMemory', []).slice(-60) : []
     };
   }
 
@@ -149,7 +181,7 @@
     if(!update || !Array.isArray(update.memoryNotes)) return;
     try{
       const existing = readJSON('aiTeamMemory', []);
-      const merged = [...existing, ...update.memoryNotes]
+      const merged = [...(Array.isArray(existing) ? existing : []), ...update.memoryNotes]
         .filter(x => typeof x === 'string' && x.trim())
         .filter((x, i, arr) => arr.indexOf(x) === i)
         .slice(-60);
@@ -167,7 +199,12 @@
     if(mention){
       const wanted = mention[1].toLowerCase();
       const found = agentButtons.find(b => b.dataset.agent === wanted);
-      if(found){ agentButtons.forEach(b => b.classList.remove('active')); found.classList.add('active'); agent = wanted; }
+      if(found){
+        agentButtons.forEach(b => b.classList.remove('active'));
+        found.classList.add('active');
+        agent = wanted;
+        updateModeUI();
+      }
     }
 
     const sentImage = imageData;
@@ -215,7 +252,7 @@
   try{
     const saved = JSON.parse(localStorage.getItem('csecTutorMessages') || '[]');
     if(Array.isArray(saved) && saved.length){
-      messages = saved.slice(-16);
+      messages = saved.slice(-16).filter(m => m && ['user','assistant'].includes(m.role) && typeof m.content === 'string');
       chat.innerHTML = '';
       messages.forEach(m => addBubble(m.role === 'assistant' ? 'ai' : 'user', m.content));
     }
