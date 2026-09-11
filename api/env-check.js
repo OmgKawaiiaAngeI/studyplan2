@@ -1,1 +1,0 @@
-export default function handler(req,res){res.status(200).json({blob:!!process.env.BLOB_READ_WRITE_TOKEN,kv:!!process.env.KV_REST_API_URL,redis:!!process.env.REDIS_URL});}
