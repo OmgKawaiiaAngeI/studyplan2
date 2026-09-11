@@ -1,7 +1,7 @@
 (() => {
   const $=id=>document.getElementById(id), KEY='focusGardenV1';
   const plants={sunflower:{name:'Sunflower',full:'🌻',stages:['🟤','🌱','🌿','🌿🟢','🌻']},cactus:{name:'Cactus',full:'🌵',stages:['🟤','🌱','🌵','🌵🌵','🌵🌸']},flower:{name:'Cherry Blossom',full:'🌸',stages:['🟤','🌱','🌿','🌷','🌸']}};
-  const fresh=()=>({active:'sunflower',minutes:0,garden:[]});
+  const fresh=()=>({active:'sunflower',minutes:0,garden:[],justCompleted:false});
   function load(){try{return Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{return fresh()}}
   function save(s){localStorage.setItem(KEY,JSON.stringify(s))}
   function stage(min){return min>=120?5:min>=75?4:min>=50?3:min>=25?2:1}
@@ -13,11 +13,11 @@
     const focusButton=[...document.querySelectorAll('.study-home-action')].find(b=>b.textContent.includes('Focus'));if(focusButton)focusButton.onclick=()=>window.studyAppShow?.('focus');
     wrapTimer();render();
   }
-  function choose(id){const s=load();if(s.minutes>0&&s.active!==id)return;s.active=id;save(s);render()}
+  function choose(id){const s=load();if(s.minutes>0&&s.active!==id)return;s.active=id;s.justCompleted=false;save(s);render()}
   function render(){const s=load(),p=plants[s.active]||plants.sunflower,st=stage(s.minutes);if(!$('plantArt'))return;$('plantArt').textContent=p.stages[st-1];$('plantArt').className='plant-art stage-'+st;$('plantTitle').textContent=`Growing ${p.name} ${p.full}`;$('plantMinutes').textContent=`${Math.min(120,s.minutes)} / 120 minutes`;$('plantProgressFill').style.width=Math.min(100,s.minutes/120*100)+'%';$('plantStage').textContent=`Stage ${st} of 5${st===5?' · Fully grown':''}`;document.querySelectorAll('[data-plant]').forEach(b=>{b.classList.toggle('active',b.dataset.plant===s.active);b.disabled=s.minutes>0&&b.dataset.plant!==s.active});renderGarden()}
   function renderGarden(){if(!$('gardenGrid'))return;const s=load();$('gardenGrid').innerHTML=s.garden.length?s.garden.slice().reverse().map(x=>`<div class="garden-item"><span class="emoji">${plants[x.type]?.full||'🌿'}</span><b>${plants[x.type]?.name||'Plant'}</b><small>Completed ${new Date(x.completed).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</small></div>`).join(''):'<div class="garden-empty">No fully grown plants yet. Finish 120 focus minutes to grow your first one 🌱</div>'}
   function celebratePlant(p){const layer=document.createElement('div');layer.className='focus-celebration';for(let i=0;i<18;i++){const e=document.createElement('span');e.className='focus-petal';e.textContent=i%2?'🌸':'✨';e.style.left=(Math.random()*100)+'vw';e.style.animationDelay=(Math.random()*.5)+'s';layer.appendChild(e)}document.body.appendChild(layer);setTimeout(()=>layer.remove(),2300);if(typeof celebrate==='function')celebrate(`Your ${p.name} is fully grown! ${p.full}`)}
-  function addMinutes(min){if(!min||min<1)return;const s=load(),p=plants[s.active]||plants.sunflower;s.minutes+=min;if(s.minutes>=120){s.garden.push({id:crypto.randomUUID(),type:s.active,completed:new Date().toISOString()});save(s);celebratePlant(p);s.minutes=0;save(s)}else save(s);render()}
-  function wrapTimer(){const original=timerTick;timerTick=function(){const before=timerMode;original();if(before==='focus'&&timerMode==='break'){const mins=Math.max(1,Math.round(+($('focusMinutesInput')?.value||25)));addMinutes(mins)}}}
+  function addMinutes(min){if(!min||min<1)return;const s=load(),p=plants[s.active]||plants.sunflower;if(s.justCompleted)return;s.minutes=Math.min(120,s.minutes+min);if(s.minutes>=120){s.garden.push({id:crypto.randomUUID(),type:s.active,completed:new Date().toISOString()});s.justCompleted=true;save(s);render();celebratePlant(p);setTimeout(()=>{const latest=load();if(latest.justCompleted&&latest.minutes>=120){latest.minutes=0;latest.justCompleted=false;save(latest);render()}},1800)}else{save(s);render()}}
+  function wrapTimer(){if(window.__privateGardenTimerWrapped)return;window.__privateGardenTimerWrapped=true;const original=timerTick;timerTick=function(){const before=timerMode;original();if(before==='focus'&&timerMode==='break'){const mins=Math.max(1,Math.round(+($('focusMinutesInput')?.value||25)));addMinutes(mins)}}}
   window.addEventListener('storage',render);wait();
 })();
