@@ -7,7 +7,7 @@
     const oldViews=[...wrap.querySelectorAll(':scope > .view')];
     const shell=document.createElement('div'); shell.className='app-shell-v3';
     const side=document.createElement('aside'); side.className='app-side'; side.id='appSideNav';
-    side.innerHTML=`<div class="app-side-title">Study Planner</div><div class="secondary-section-label">Tools</div><button data-shellgo="planner">🗓️ Planner</button><button data-shellgo="mynotes">📝 Notes</button><button data-shellgo="checkins">📚 My Work</button><button data-shellgo="progress">📊 Progress</button><button data-shellgo="mistakes">📕 Mistake Book</button><button data-shellgo="rewards">🎁 Settings & Rewards</button><div class="secondary-section-label">More</div><button data-shellgo="tutor">🧠 AI Team</button>`;
+    side.innerHTML=`<div class="app-side-title">Study Planner</div><button data-shellgo="dashboard">⌂ Home</button><div class="secondary-section-label">Tools</div><button data-shellgo="planner">🗓️ Planner</button><button data-shellgo="mynotes">📝 Notes</button><button data-shellgo="checkins">📚 My Work</button><button data-shellgo="progress">📊 Progress</button><button data-shellgo="mistakes">📕 Mistake Book</button><button data-shellgo="rewards">🎁 Settings & Rewards</button><div class="secondary-section-label">More</div><button data-shellgo="tutor">🧠 AI Team</button>`;
     const main=document.createElement('div'); main.className='app-main-area';
     const menu=document.createElement('button');menu.className='app-menu-btn';menu.id='appMenuBtn';menu.textContent='☰ Menu';main.appendChild(menu);
     oldViews.forEach(v=>main.appendChild(v)); shell.append(side,main); wrap.appendChild(shell);
