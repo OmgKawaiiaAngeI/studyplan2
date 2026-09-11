@@ -1,0 +1,1 @@
+Study Plan 2 restored and redeployed after reverting the broken index edit.
