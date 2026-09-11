@@ -24,10 +24,7 @@ export default async function handler(req, res) {
     checkins: Array.isArray(rawContext.checkins) ? rawContext.checkins.slice(-12) : [],
     questionStats: rawContext.questionStats && typeof rawContext.questionStats === 'object' ? rawContext.questionStats : {},
     weakTopics: Array.isArray(rawContext.weakTopics) ? rawContext.weakTopics.slice(-20) : [],
-    mistakes: Array.isArray(rawContext.mistakes) ? rawContext.mistakes.slice(-30) : [],
-    mastery: rawContext.mastery && typeof rawContext.mastery === 'object' ? rawContext.mastery : {},
-    goals: Array.isArray(rawContext.goals) ? rawContext.goals.slice(-20) : [],
-    recentSessions: Array.isArray(rawContext.recentSessions) ? rawContext.recentSessions.slice(-10) : []
+    memoryNotes: Array.isArray(rawContext.memoryNotes) ? rawContext.memoryNotes.filter(x => typeof x === 'string').slice(-60) : []
   };
 
   const image = typeof body.image === 'string' ? body.image : null;
@@ -84,6 +81,7 @@ ADAPTIVE RULES:
 - Original practice only; do not reproduce copyrighted exam questions verbatim.
 - Do not pretend specialists are separate autonomous programs or that work happens in the background.
 - Keep the visible response useful and concise rather than printing internal agent deliberations.
+- memoryNotes are short durable study facts only: mistakes, weak/strong topics, scores, goals, deadlines, or study preferences actually supported by the conversation. Do not save random chat details.
 
 CSEC MATHS SCOPE:
 Computation; Number Theory; Consumer Arithmetic; Sets; Measurement; Statistics; Algebra; Relations, Functions and Graphs; Geometry and Trigonometry; Vectors and Matrices.
@@ -100,7 +98,7 @@ FORMATTING:
 - Use standard LaTeX inside those delimiters.
 - Keep most replies under 600 words unless a full quiz/mock or longer derivation needs more.
 
-Return only JSON matching the requested schema. In studentUpdate, preserve existing supplied mistakes/mastery/goals/sessions unless the conversation gives a justified update. Add only evidence-based information.`;
+Return only JSON matching the requested schema. studentUpdate.memoryNotes should contain ONLY new evidence-based durable study facts worth remembering from this turn. Return an empty array when there is nothing new to store.`;
 
   const apiInput = messages.map(m => ({ role: m.role, content: [{ type: 'input_text', text: m.content }] }));
   if (validImage) {
@@ -114,14 +112,12 @@ Return only JSON matching the requested schema. In studentUpdate, preserve exist
     properties: {
       answer: { type: 'string' },
       studentUpdate: {
-        type: 'object', additionalProperties: false,
+        type: 'object',
+        additionalProperties: false,
         properties: {
-          mistakes: { type: 'array', items: { type: 'object', additionalProperties: true } },
-          mastery: { type: 'object', additionalProperties: true },
-          goals: { type: 'array', items: { type: 'object', additionalProperties: true } },
-          sessions: { type: 'array', items: { type: 'object', additionalProperties: true } }
+          memoryNotes: { type: 'array', items: { type: 'string' } }
         },
-        required: ['mistakes','mastery','goals','sessions']
+        required: ['memoryNotes']
       }
     },
     required: ['answer','studentUpdate']
@@ -162,7 +158,7 @@ Return only JSON matching the requested schema. In studentUpdate, preserve exist
 
     return res.status(200).json({
       answer: typeof parsed.answer === 'string' ? parsed.answer.trim() : '',
-      studentUpdate: parsed.studentUpdate || null
+      studentUpdate: parsed.studentUpdate || { memoryNotes: [] }
     });
   } catch (err) {
     console.error(err);
