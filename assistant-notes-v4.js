@@ -1,7 +1,14 @@
 (()=>{
   // Notes added here by ChatGPT after the user sends them in chat.
   // Each note imports once into the browser's existing persistent myNotes store.
-  const incoming=[];
+  const incoming=[
+    {
+      id:'math-algebra-combining-like-terms-20260911',
+      category:'Maths → Algebra → Simplifying Expressions',
+      title:'Combining like terms with exponents',
+      body:'When adding like terms, add the coefficients (the numbers in front) and keep the exponent unchanged. Do NOT square the coefficients first. Example: 3x² + 5x² = 8x², because 3 + 5 = 8 and x² stays x².'
+    }
+  ];
   function importNotes(){
     try{
       if(typeof myNotes==='undefined'||typeof saveMn!=='function'||typeof renderMnList!=='function')return false;
