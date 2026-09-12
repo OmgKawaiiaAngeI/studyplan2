@@ -32,14 +32,23 @@
   const EMAIL_DOMAIN='studyplan2.local';
   const emailFor=username=>`${username}@${EMAIL_DOMAIN}`;
   async function loadProfile(user){
-    const {data,error}=await sb.from('profiles').select('id,username,display_name,bio,avatar_url,banner_url,points,is_owner,equipped_avatar_frame,equipped_profile_border').eq('id',user.id).single();
+    const {data,error}=await sb.from('profiles').select('id,username,display_name,bio,avatar_url,banner_url,points,is_owner,is_banned,equipped_avatar_frame,equipped_profile_border,equipped_banner').eq('id',user.id).single();
     if(error)throw error;return {...data,email:user.email||''};
   }
-  function gate(){
-    if(document.getElementById('sp9AccountGate'))return;
-    const g=document.createElement('div');g.id='sp9AccountGate';g.innerHTML=`<div class="sp6-account-card"><div class="sp6-account-kicker">Study Planner</div><h1>Welcome to your study space</h1><p>Your account now works across devices. Create an account or sign in below.</p><form id="sp9Form"><label>Username<input id="sp9Username" maxlength="24" autocomplete="username" required></label><label>Password<input id="sp9Password" type="password" minlength="6" maxlength="128" autocomplete="current-password" required></label><button type="submit">Sign in</button></form><button id="sp9Mode" class="sp6-link-btn" type="button">Create an account</button><div id="sp9Msg" class="sp6-account-msg"></div><small>Your private study data stays separated by account. Profiles and social features are stored securely in Supabase.</small></div>`;
+  async function rejectIfBanned(p){
+    if(!p.is_banned)return false;
+    try{await sb.auth.signOut()}catch{}
+    rawRemove(SESSION_CACHE);activeId='';
+    gate('This account has been suspended.');
+    return true;
+  }
+  function gate(prefill){
+    const existing=document.getElementById('sp9AccountGate');
+    if(existing){if(prefill)existing.querySelector('#sp9Msg').textContent=prefill;return}
+    const g=document.createElement('div');g.id='sp9AccountGate';g.innerHTML=`<div class="sp6-account-card"><div class="sp6-account-kicker">Study Planner</div><h1>Welcome to your study space</h1><p>Your account now works across devices. Create an account or sign in below.</p><form id="sp9Form"><label>Username<input id="sp9Username" maxlength="24" autocomplete="username" required></label><label>Password<input id="sp9Password" type="password" minlength="6" maxlength="128" autocomplete="current-password" required></label><button type="submit">Sign in</button></form><button id="sp9Mode" class="sp6-link-btn" type="button">Create an account</button><div id="sp9Msg" class="sp6-account-msg">${safe(prefill||'')}</div><small>Your private study data stays separated by account. Profiles and social features are stored securely in Supabase.</small></div>`;
     document.body.appendChild(g);let mode='login';const form=g.querySelector('#sp9Form'),btn=form.querySelector('button'),toggle=g.querySelector('#sp9Mode'),msg=g.querySelector('#sp9Msg');
-    const draw=()=>{const create=mode==='create';btn.textContent=create?'Create account':'Sign in';toggle.textContent=create?'I already have an account':'Create an account';msg.textContent=''};draw();
+    const draw=(keepMsg)=>{const create=mode==='create';btn.textContent=create?'Create account':'Sign in';toggle.textContent=create?'I already have an account':'Create an account';if(!keepMsg)msg.textContent=''};
+    draw(true);
     toggle.onclick=()=>{mode=mode==='login'?'create':'login';draw()};
     form.onsubmit=async e=>{e.preventDefault();msg.textContent='Checking…';btn.disabled=true;try{
       const username=g.querySelector('#sp9Username').value.trim().toLowerCase(),password=g.querySelector('#sp9Password').value,email=emailFor(username);
@@ -49,16 +58,16 @@
         if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('That username is already taken.');
         let session=data.session,user=data.user;
         if(!session){const r=await sb.auth.signInWithPassword({email,password});if(r.error)throw r.error;session=r.data.session;user=r.data.user}
-        const p=await loadProfile(user);migrateOldData(p.id,p.username);setAccount(p);location.reload();
+        const p=await loadProfile(user);if(await rejectIfBanned(p))return;migrateOldData(p.id,p.username);setAccount(p);location.reload();
       }else{
         const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw new Error(/invalid/i.test(error.message)?'Wrong username or password.':error.message);
-        const p=await loadProfile(data.user);migrateOldData(p.id,p.username);setAccount(p);location.reload();
+        const p=await loadProfile(data.user);if(await rejectIfBanned(p))return;migrateOldData(p.id,p.username);setAccount(p);location.reload();
       }
     }catch(err){msg.textContent=err?.message||'Could not sign in.'}finally{btn.disabled=false}};
   }
   async function logout(){try{await sb?.auth.signOut()}catch{}rawRemove(SESSION_CACHE);activeId='';location.reload()}
   function badge(){const wait=()=>{const side=document.getElementById('appSideNav');if(!side){setTimeout(wait,100);return}if(document.getElementById('sp6AccountBox'))return;const b=document.createElement('div');b.id='sp6AccountBox';b.className='sp6-account-box';b.innerHTML=`<span>Signed in as</span><strong>${safe(cached?.username||'Account')}</strong><button type="button">Log out</button>`;b.querySelector('button').onclick=logout;side.appendChild(b)};wait()}
-  async function init(){sb=client();if(!sb){gate();return}try{const {data}=await sb.auth.getSession();if(data.session?.user){const p=await loadProfile(data.session.user);setAccount(p);badge();return}}catch{}if(cached){rawRemove(SESSION_CACHE);activeId='';location.reload();return}gate()}
+  async function init(){sb=client();if(!sb){gate();return}try{const {data}=await sb.auth.getSession();if(data.session?.user){const p=await loadProfile(data.session.user);if(await rejectIfBanned(p))return;setAccount(p);badge();return}}catch{}if(cached){rawRemove(SESSION_CACHE);activeId='';location.reload();return}gate()}
   window.StudyAccounts={isSignedIn:()=>!!activeId,current:()=>cached?{...cached}:null,logout,rawGet,rawSet,rawRemove,list:()=>cached?[cached]:[],prefix:()=>prefix(),supabase:()=>sb,refreshProfile:async()=>{if(!sb)return null;const {data}=await sb.auth.getUser();if(!data.user)return null;const p=await loadProfile(data.user);setAccount(p);return p}};
   document.addEventListener('DOMContentLoaded',init);
 })();
