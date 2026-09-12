@@ -19,6 +19,12 @@
       category:'Maths → Algebra → Expanding and Simplifying Expressions',
       title:'Subtracting a bracket flips its signs',
       body:'When a whole bracket is being subtracted, the signs of every term inside that bracket change when the bracket is removed. A positive becomes negative, and a negative becomes positive. Example: a(a+b) - a(2a-b). First expand to get a² + ab - (2a² - ab). Removing the subtracted bracket gives a² + ab - 2a² + ab, because subtracting -ab becomes +ab. Then simplify to -a² + 2ab.'
+    },
+    {
+      id:'math-algebra-minus-before-positive-bracket-20260912',
+      category:'Maths → Algebra → Expanding and Simplifying Expressions',
+      title:'A minus before a bracket changes every sign',
+      body:'If a minus sign is in front of a whole bracket, change the sign of EVERY term when removing the bracket. Example: -(x² + x) becomes -x² - x. So in 3x² + 45x - (x² + x), the x² and x both become negative, giving 3x² + 45x - x² - x.'
     }
   ];
   function importNotes(){
