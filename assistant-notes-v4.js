@@ -7,6 +7,12 @@
       category:'Maths → Algebra → Simplifying Expressions',
       title:'Combining like terms with exponents',
       body:'When adding like terms, add the coefficients (the numbers in front) and keep the exponent unchanged. Do NOT square the coefficients first. Example: 3x² + 5x² = 8x², because 3 + 5 = 8 and x² stays x².'
+    },
+    {
+      id:'math-algebra-standard-term-order-20260911',
+      category:'Maths → Algebra → Simplifying Expressions',
+      title:'Order of terms in a simplified expression',
+      body:'Changing the order of terms does not change the value as long as each sign stays attached to its term. However, the standard/neater form is to write terms from highest power to lowest power, then the constant. Example: -5x + 8x² + 3 is equivalent to 8x² - 5x + 3, but 8x² - 5x + 3 is the preferred standard form. Always keep the exponent: 8x² must not accidentally become 8x.'
     }
   ];
   function importNotes(){
