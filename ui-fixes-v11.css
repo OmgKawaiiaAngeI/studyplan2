@@ -1,0 +1,11 @@
+/* v11 targeted layout fixes */
+/* PFP cosmetics: give the artwork its own larger canvas so no edge of the frame is clipped. */
+.sp8-avatar-wrap{overflow:visible!important;isolation:visible!important}
+.sp8-avatar-wrap:after{inset:-30%!important;width:160%!important;height:160%!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important;overflow:visible!important;max-width:none!important;max-height:none!important}
+.sp8-avatar-wrap[data-avatar-frame="frame_petal_pop"]:after,.sp8-avatar-wrap[data-avatar-frame="frame_starry_dream"]:after,.sp8-avatar-wrap[data-avatar-frame="frame_cloudy_day"]:after,.sp8-avatar-wrap[data-avatar-frame="frame_ribbon_kiss"]:after{inset:-13px!important;width:auto!important;height:auto!important}
+.sp8-avatar-wrap[data-avatar-frame="frame_pearl_bow"]:after,.sp8-avatar-wrap[data-avatar-frame="frame_sweet_crown"]:after{inset:-32%!important;width:164%!important;height:164%!important}
+/* Workflow: inputs own the flexible width; Add stays compact inside the left notebook page. */
+.wf-inputrow{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:stretch!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important}
+.wf-inputrow input,.wf-inputrow select{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+.wf-inputrow .wf-btn{width:auto!important;min-width:64px!important;max-width:92px!important;padding:8px 12px!important;white-space:nowrap!important;box-sizing:border-box!important}
+@media(max-width:520px){.wf-inputrow{grid-template-columns:minmax(0,1fr) auto!important}.wf-inputrow .wf-btn{min-width:58px!important;max-width:76px!important;padding:8px 10px!important}}
