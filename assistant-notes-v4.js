@@ -13,6 +13,12 @@
       category:'Maths → Algebra → Simplifying Expressions',
       title:'Order of terms in a simplified expression',
       body:'Changing the order of terms does not change the value as long as each sign stays attached to its term. However, the standard/neater form is to write terms from highest power to lowest power, then the constant. Example: -5x + 8x² + 3 is equivalent to 8x² - 5x + 3, but 8x² - 5x + 3 is the preferred standard form. Always keep the exponent: 8x² must not accidentally become 8x.'
+    },
+    {
+      id:'math-algebra-subtracting-brackets-20260911',
+      category:'Maths → Algebra → Expanding and Simplifying Expressions',
+      title:'Subtracting a bracket flips its signs',
+      body:'When a whole bracket is being subtracted, the signs of every term inside that bracket change when the bracket is removed. A positive becomes negative, and a negative becomes positive. Example: a(a+b) - a(2a-b). First expand to get a² + ab - (2a² - ab). Removing the subtracted bracket gives a² + ab - 2a² + ab, because subtracting -ab becomes +ab. Then simplify to -a² + 2ab.'
     }
   ];
   function importNotes(){
