@@ -1,0 +1,13 @@
+/* v12: final theme layer. All application surfaces inherit the selected appearance palette. */
+html,body,.wrap,.app-main-area,.view,.wf-wrap,.notes-notebook-v5{background-color:var(--sp-bg)!important;color:var(--sp-ink)!important}
+.panel,.app-side,.ast-home-card,.wf-card,.wf-page,.wf-upcoming,.study-home-action,.study-mode-card,.dash-stat,.dash-action,.dash-next,.dash-mini-item,.sp6-settings-block,.sp6-theme,.sp8-profile-card,.sp8-modal-card,.sp9-shop-card,.sp9-item,.sp9-account-pop,.sp9-account-trigger,.mistake-card,.q-card,.fc-card,.tutor-chat,.manager-note,.suite-question{background-color:var(--sp-panel)!important;border-color:var(--sp-line)!important;color:var(--sp-ink)!important}
+button,input,select,textarea{border-color:var(--sp-line)!important}input,select,textarea{background:var(--sp-input)!important;color:var(--sp-ink)!important}
+a:not(.sp8-pill),.sp8-profile-card a,.sp8-profile-card .sp8-handle,.sp8-profile-card small,.sp8-profile-card .sp8-bio{color:var(--sp-muted)!important}
+.sp8-profile-card a:visited,.sp8-profile-card a:hover{color:var(--sp-muted)!important}
+.sp8-profile-card button:not(.sp8-primary){color:var(--sp-muted)!important;border-color:var(--sp-line)!important;background:var(--sp-panel)!important}
+.sp8-profile-card .sp8-primary{background:var(--sp-accent)!important;color:#fff!important}
+.sp9-account-pop{background:var(--sp-panel)!important}.sp9-account-pop button{color:var(--sp-ink)!important}.sp9-account-pop button:hover{background:var(--sp-accent-soft)!important}
+.sp9-shop-card,.sp9-item{background:var(--sp-panel)!important}.sp9-balance{background:var(--sp-accent-soft)!important;color:var(--sp-ink)!important}
+.wf-page,.wf-writing,.tutor-chat{background:var(--sp-panel)!important}.wf-mood,.wf-btn.ghost{background:var(--sp-input)!important;color:var(--sp-ink)!important;border-color:var(--sp-line)!important}
+.mistake-card.mastered{background:var(--sp-accent-soft)!important}.mistake-top span,.mistake-answer strong{color:var(--sp-accent)!important}
+/* Preserve user-uploaded/cosmetic artwork, but recolor the app chrome around it. */
